@@ -12,7 +12,6 @@ The structure will look similar to this:
 test-project
 ├── src
 │   ├── components
-│   ├── utils
 │   ├── models
 │   ├── navigators
 │   ├── screens
@@ -50,7 +49,6 @@ The inside of the src directory looks similar to the following:
 ```
 ├── src
 │   ├── components
-│   ├── utils
 │   ├── models
 │   ├── navigators
 │   ├── screens
