@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
-import { View, StyleSheet, Text, FlatList, ListRenderItemInfo, TextInput } from 'react-native';
+import { View, StyleSheet, FlatList, ListRenderItemInfo, TextInput, AppState } from 'react-native';
 import { requestContactPerimmission } from './helpers/getContacts';
 import { openSettings } from 'react-native-permissions';
 
-import { Button, Icon } from 'components';
+import { Button, Icon, Text } from 'components';
 import { ContactItem, ListHeaderComponent } from './components';
 
 import Contacts from 'react-native-contacts';
@@ -26,43 +26,64 @@ const LoadContactsScreen = () => {
     const [selectedContacts, setSelectedContacts] = useState<SelectedContacts>({}); // .. selected contacts
     const [search, setSearch] = useState<string>(""); // .. search value
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
-        (async () => {
-            // .. check for contacts access perimmission
-            try {
-                await requestContactPerimmission();
-                getContacts();
+        requestContacts();
 
-            } catch (error) {
-                setIsPerimmissionDenied(true);
-            }
+        const appStateChange = AppState.addEventListener('change', requestContacts);
 
-        })()
+        return () => {
+            appStateChange.remove();
+        }
     }, [])
 
+    const requestContacts = async () => {
+        if (!isPerimmissionDenied && contacts.length > 0) {
+            return;
+        }
+
+        // .. check for contacts access perimmission
+        try {
+            await requestContactPerimmission();
+            getContacts();
+
+            setIsPerimmissionDenied(false);
+
+        } catch (error) {
+            setIsPerimmissionDenied(true);
+        }
+
+    }
+
     const getContacts = () => {
+        setLoading(true);
+
         // .. fetch contacts and added to state
         Contacts.getAll()
             .then((data) => {
+                setLoading(false);
+
                 setContacts(data);
                 setSearchedContacts(data);
             })
             .catch((e) => {
+                setLoading(false);
                 console.log(e)
             })
     }
 
-    const toggleContact = (isSelected: boolean, item: ContactUser) => {
-        // .. event to trigger when press on contact from list to select it or remove it
+    const toggleContact = useCallback(async (isSelected: boolean, item: ContactUser) => {        // // .. event to trigger when press on contact from list to select it or remove it
         const contacts = { ...selectedContacts };
         if (isSelected) {
             delete contacts[item.recordID];
-        } else {            
+        } else {
             contacts[item.recordID] = item;
-        }        
+        }
 
         setSelectedContacts(contacts);
-    }
+
+    }, [selectedContacts])
 
     const renderItem = ({ item }: ListRenderItemInfo<ContactUser>) => {
         return <ContactItem item={item} selectedContacts={selectedContacts} toggleContact={toggleContact} />
@@ -70,6 +91,10 @@ const LoadContactsScreen = () => {
 
     const listHeaderComponent = () => {
         return <ListHeaderComponent selectedContacts={selectedContacts} toggleContact={toggleContact} />
+    }
+
+    const keyExtractor = (item, index: number) => {
+        return index.toString()
     }
 
     const onSearch = (value) => {
@@ -88,6 +113,7 @@ const LoadContactsScreen = () => {
         setSearchedContacts(filterData)
     }
 
+
     if (isPerimmissionDenied) {
         // .. perimmission denied view
         return (
@@ -104,16 +130,20 @@ const LoadContactsScreen = () => {
     return (
         <View style={styles.container}>
 
+            {loading ? <Text style={styles.loadinText}>{'Loading...'}</Text> : null}
+
             <View style={styles.searchBox}>
                 <Icon type='material' name={'search'} color={colors.grey} />
                 <TextInput
                     style={styles.searchInput}
                     placeholder={'Find Contact...'}
+                    placeholderTextColor={colors.grey}
                     value={search}
                     onChangeText={onSearch} />
             </View>
 
             <FlatList
+                keyExtractor={keyExtractor}
                 data={searchedContacts}
                 renderItem={renderItem}
                 ListHeaderComponent={listHeaderComponent}
@@ -140,11 +170,16 @@ const styles = StyleSheet.create({
         margin: margins.base,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: paddings.base
+        paddingLeft: paddings.base,
+        color: colors.black
     },
     searchInput: {
         flex: 1,
         marginLeft: margins.base,
+        color: colors.black
+    },
+    loadinText: {
+        textAlign: 'center',
         color: colors.black
     }
 });

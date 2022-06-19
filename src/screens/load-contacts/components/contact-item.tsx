@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Text } from 'components';
 
 import ContactUser from "../props/contact-props";
 import SelectedContacts from "../props/selected-contacts-props";
@@ -19,13 +20,14 @@ const ContactItem = ({
     selectedContacts,
     toggleContact
 }: Props) => {
+
     const number = Array.isArray(item.phoneNumbers) && item.phoneNumbers.length !== 0 ? item.phoneNumbers[0].number : null;
     const isSelected = selectedContacts[item.recordID] ? true : false;
     return (
         <TouchableOpacity style={styles.container} onPress={() => {
 
             toggleContact(isSelected, item);
-            
+
         }}>
             <View style={styles.contentView}>
 

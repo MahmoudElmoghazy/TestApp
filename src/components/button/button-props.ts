@@ -1,7 +1,6 @@
-import { ViewStyleProp } from "react-native/Libraries/StyleSheet/StyleSheet";
+import { ButtonsProps } from 'react-native'
 
-export default interface Props {
-    onPress: () => void;
+export default interface ButtonProps extends ButtonsProps {
     title: string;
-    style?: ViewStyleProp
+    onPress: () => void;
 }

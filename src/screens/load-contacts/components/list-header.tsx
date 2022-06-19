@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { FlatList, TouchableOpacity, StyleSheet, Image, View, Text } from 'react-native';
-import { Icon } from 'components';
+import { FlatList, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
+import { Icon, Text } from 'components';
 
 import SelectedContacts from "../props/selected-contacts-props";
 import ContactUser from "../props/contact-props";
@@ -15,11 +15,16 @@ interface Props {
     toggleContact: (isSelected: boolean, contact: ContactUser) => void;
 }
 
+
 const ListHeaderComponent = ({
     selectedContacts,
     toggleContact
 }: Props) => {
-        
+
+    const keyExtractor = (item, index: number) => {
+        return index.toString()
+    }    
+
     const renderItem = ({ item }) => {
 
         return (
@@ -44,9 +49,14 @@ const ListHeaderComponent = ({
 
             </TouchableOpacity>
         )
-    }
+    };
 
-    const items = Object.values(selectedContacts) || [];
+
+
+    const items = useMemo(() => {
+        return Object.values(selectedContacts) || [];
+    }, [selectedContacts])
+
     if (items.length === 0) {
         return null;
     }
@@ -54,6 +64,7 @@ const ListHeaderComponent = ({
     return (
         <FlatList
             style={styles.flatList}
+            keyExtractor={keyExtractor}
             horizontal
             data={items}
             renderItem={renderItem} />
