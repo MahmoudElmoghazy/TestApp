@@ -57,10 +57,7 @@ The inside of the src directory looks similar to the following:
 ```
 
 **components**
-This is where your React components will live. Each component will have a directory containing the `.tsx` file, along with a story file, and optionally `.presets`, and `.props` files for larger components. The app will come with some commonly used components like Button.
-
-**models**
-This is where your app's models will live. Each model has a directory which will contain the `mobx-state-tree` model file, test file, and any other supporting files like actions, types, etc.
+This is where your React components will live. Each component will have a directory containing the `.tsx` file, and `.props` files for larger components. The app will come with some commonly used components like Button.
 
 **navigators**
 This is where your `react-navigation` navigators will live.
